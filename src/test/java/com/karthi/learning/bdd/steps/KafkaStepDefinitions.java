@@ -1,5 +1,6 @@
 package com.karthi.learning.bdd.steps;
 
+import com.karthi.learning.bdd.config.SpringIntegrationTest;
 import com.karthi.learning.service.KafkaConsumer;
 import com.karthi.learning.service.KafkaProducer;
 import io.cucumber.java.en.Given;
@@ -11,7 +12,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
 
-//@CucumberContextConfiguration
+import static org.junit.Assert.assertEquals;
+
 @EmbeddedKafka(partitions = 1,
         topics = {"test_topic"},
         brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
@@ -19,7 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
         "spring.kafka.bootstrap-servers = ${spring.embedded.kafka.brokers}",
 })
-public class KafkaStepDefinitions {
+public class KafkaStepDefinitions extends SpringIntegrationTest {
 
     @Autowired
     private KafkaProducer kafkaProducer;  // Assuming you have a KafkaProducer service
@@ -49,7 +51,7 @@ public class KafkaStepDefinitions {
         Thread.sleep(1000);  // Simulating waiting for message consumption
 
         // Verify that the message is received by the KafkaConsumer
-//        receivedMessage = kafkaConsumer.getReceivedMessage();
-//        assertEquals("Test Message", receivedMessage);
+        receivedMessage = kafkaConsumer.getReceivedMessage();
+        assertEquals("Test Message", receivedMessage);
     }
 }
