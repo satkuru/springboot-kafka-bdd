@@ -13,6 +13,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @EmbeddedKafka(partitions = 1,
         topics = {"test_topic"},
@@ -33,8 +34,8 @@ public class KafkaStepDefinitions extends SpringIntegrationTest {
 
     @Given("a Kafka producer is available")
     public void givenKafkaProducerIsAvailable() {
-        Assert.assertNotNull(kafkaProducer);
-        Assert.assertNotNull(kafkaConsumer);
+        assertNotNull(kafkaProducer);
+        assertNotNull(kafkaConsumer);
         // You can verify that the KafkaProducer bean is injected correctly.
     }
 
