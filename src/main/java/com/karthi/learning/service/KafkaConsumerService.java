@@ -1,10 +1,12 @@
 package com.karthi.learning.service;
 
+import lombok.Getter;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+@Getter
 @Service
-public class KafkaConsumer {
+public class KafkaConsumerService {
 
     private String receivedMessage;
 
@@ -13,7 +15,4 @@ public class KafkaConsumer {
         this.receivedMessage = message;
     }
 
-    public String getReceivedMessage() {
-        return receivedMessage;
-    }
 }

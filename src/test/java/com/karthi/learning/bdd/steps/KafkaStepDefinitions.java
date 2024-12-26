@@ -1,58 +1,45 @@
 package com.karthi.learning.bdd.steps;
 
 import com.karthi.learning.bdd.config.SpringIntegrationTest;
-import com.karthi.learning.service.KafkaConsumer;
-import com.karthi.learning.service.KafkaProducer;
+import com.karthi.learning.service.KafkaConsumerService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Assert;
+import org.awaitility.Awaitility;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.kafka.core.KafkaTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.concurrent.TimeUnit;
 
-@EmbeddedKafka(partitions = 1,
-        topics = {"test_topic"},
-        brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
-@EnableKafka
-@TestPropertySource(properties = {
-        "spring.kafka.bootstrap-servers = ${spring.embedded.kafka.brokers}",
-})
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class KafkaStepDefinitions extends SpringIntegrationTest {
 
     @Autowired
-    private KafkaProducer kafkaProducer;  // Assuming you have a KafkaProducer service
+    private KafkaTemplate<String,String> kafkaTemplate;
 
     @Autowired
-    private KafkaConsumer kafkaConsumer;  // Assuming you have a KafkaConsumer service
+    private KafkaConsumerService service;
 
     private String receivedMessage;
 
     @Given("a Kafka producer is available")
     public void givenKafkaProducerIsAvailable() {
-        assertNotNull(kafkaProducer);
-        assertNotNull(kafkaConsumer);
-        // You can verify that the KafkaProducer bean is injected correctly.
+        assertNotNull( kafkaTemplate);
     }
 
     @When("a message is sent to the {string} topic")
     public void whenMessageIsSentToTopic(String topic) {
         // Send a message to Kafka
         String message = "Test Message";
-        kafkaProducer.sendMessage(topic, message);
+        kafkaTemplate.send(topic, message);
+        receivedMessage = message;
     }
 
     @Then("the consumer should receive the message")
     public void thenTheConsumerShouldReceiveTheMessage() throws InterruptedException {
-        // Wait for the consumer to process the message
-        Thread.sleep(1000);  // Simulating waiting for message consumption
-
-        // Verify that the message is received by the KafkaConsumer
-        receivedMessage = kafkaConsumer.getReceivedMessage();
-        assertEquals("Test Message", receivedMessage);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(()->service.getReceivedMessage()!=null);
+        assertEquals(receivedMessage,service.getReceivedMessage());
     }
 }
